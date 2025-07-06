@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       height: 100%;
       margin: 0;
@@ -60,6 +64,12 @@
       font-size: 18px;
     }
 
+    #average-rating {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
     input[type="number"] {
       width: 100%;
       padding: 10px;
@@ -95,20 +105,21 @@
 
   <div id="rating-form">
     <h3 id="place-name">Place Name</h3>
-    <div id="average-rating" style="color: #666; font-size: 14px; margin-bottom: 10px;"></div>
+    <div id="average-rating">No ratings yet</div>
     <input type="number" id="rating" min="1" max="5" placeholder="Rate Guinness 1–5">
     <div>
       <button onclick="submitRating()">Submit</button>
       <button onclick="closeForm()">Cancel</button>
     </div>
   </div>
-  <!-- JavaScript logic -->
+
   <script>
     let map;
     let selectedPlace = null;
     let placesService;
     let markers = [];
     let avgRatings = {};
+    let infoWindow;
 
     function initMap() {
       const dublin = { lat: 53.3498, lng: -6.2603 };
@@ -118,6 +129,7 @@
       });
 
       placesService = new google.maps.places.PlacesService(map);
+      infoWindow = new google.maps.InfoWindow();
 
       fetchAverageRatings().then(() => {
         searchNearby(dublin);
@@ -172,11 +184,9 @@
               title: place.name
             });
 
-            const infoWindow = new google.maps.InfoWindow({
-              content: `<strong>${place.name}</strong><br>${ratingLabel}`
-            });
-
             marker.addListener("click", () => {
+              closeForm();
+
               selectedPlace = {
                 name: place.name,
                 place_id: place.place_id,
@@ -185,8 +195,12 @@
               };
 
               document.getElementById("place-name").innerText = selectedPlace.name;
+              document.getElementById("average-rating").innerText = info
+                ? `Average rating: ${info.average_rating} (${info.rating_count})`
+                : "No ratings yet";
               document.getElementById("rating-form").style.display = "block";
 
+              infoWindow.setContent(`<strong>${place.name}</strong><br>${ratingLabel}`);
               infoWindow.open(map, marker);
             });
 
@@ -220,7 +234,7 @@
         body: JSON.stringify(payload)
       })
       .then(res => res.json())
-      .then(data => {
+      .then(() => {
         alert("Thanks for your rating!");
         closeForm();
         fetchAverageRatings().then(() => {
