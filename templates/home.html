@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Rate My Guinness</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+
+    #rating-form {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: white;
+      padding: 16px 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      display: none;
+      width: 280px;
+      text-align: center;
+    }
+
+    #rating-form h3 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #222;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 4px;
+    }
+
+    button:hover {
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="rating-form">
+    <h3 id="place-name">Place Name</h3>
+    <input type="number" id="rating" min="1" max="5" placeholder="Rate Guinness 1–5">
+    <div>
+      <button onclick="submitRating()">Submit</button>
+      <button onclick="closeForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- JavaScript logic -->
+  <script>
+    let map;
+    let selectedPlace = null;
+    let placesService;
+    let markers = [];
+    let avgRatings = {};
+
+    function initMap() {
+      const dublin = { lat: 53.3498, lng: -6.2603 };
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: dublin,
+        zoom: 14
+      });
+
+      placesService = new google.maps.places.PlacesService(map);
+
+      fetchAverageRatings().then(() => {
+        searchNearby(dublin);
+      });
+
+      map.addListener("idle", () => {
+        const center = map.getCenter();
+        if (center) {
+          fetchAverageRatings().then(() => {
+            searchNearby({ lat: center.lat(), lng: center.lng() });
+          });
+        }
+      });
+    }
+
+    async function fetchAverageRatings() {
+      try {
+        const res = await fetch("/api/ratings");
+        const data = await res.json();
+        avgRatings = {};
+        data.forEach(entry => {
+          avgRatings[entry.place_id] = entry;
+        });
+      } catch (err) {
+        console.error("Failed to fetch ratings", err);
+      }
+    }
+
+    function searchNearby(location) {
+      const request = {
+        location,
+        radius: 1500,
+        query: "bar OR pub OR restaurant"
+      };
+
+      markers.forEach(marker => marker.setMap(null));
+      markers = [];
+
+      placesService.textSearch(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+          results.forEach(place => {
+            if (!place.geometry || !place.geometry.location) return;
+
+            const info = avgRatings[place.place_id];
+            const ratingLabel = info
+              ? `Avg: ${info.average_rating} (${info.rating_count})`
+              : "No ratings";
+
+            const marker = new google.maps.Marker({
+              map,
+              position: place.geometry.location,
+              title: place.name
+            });
+
+            const infoWindow = new google.maps.InfoWindow({
+              content: `<strong>${place.name}</strong><br>${ratingLabel}`
+            });
+
+            marker.addListener("click", () => {
+              selectedPlace = {
+                name: place.name,
+                place_id: place.place_id,
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng()
+              };
+
+              document.getElementById("place-name").innerText = selectedPlace.name;
+              document.getElementById("rating-form").style.display = "block";
+
+              infoWindow.open(map, marker);
+            });
+
+            markers.push(marker);
+          });
+        } else {
+          console.error("Places search failed:", status);
+        }
+      });
+    }
+
+    function closeForm() {
+      document.getElementById("rating-form").style.display = "none";
+    }
+
+    function submitRating() {
+      const ratingValue = parseInt(document.getElementById("rating").value);
+      if (!ratingValue || ratingValue < 1 || ratingValue > 5) {
+        alert("Please enter a valid rating between 1 and 5.");
+        return;
+      }
+
+      const payload = {
+        place: selectedPlace,
+        rating: ratingValue
+      };
+
+      fetch("/api/ratings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert("Thanks for your rating!");
+        closeForm();
+        fetchAverageRatings().then(() => {
+          const center = map.getCenter();
+          if (center) {
+            searchNearby({ lat: center.lat(), lng: center.lng() });
+          }
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Something went wrong.");
+      });
+    }
+  </script>
+
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMSMcRvyIvSnYzkuArJlie5cxl-R29xgA&callback=initMap&libraries=places">
+  </script>
+</body>
+</html>
