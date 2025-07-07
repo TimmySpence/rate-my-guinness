@@ -122,27 +122,66 @@
     let infoWindow;
 
     function initMap() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const userLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          map = new google.maps.Map(document.getElementById("map"), {
+            center: userLocation,
+            zoom: 14
+          });
+
+          placesService = new google.maps.places.PlacesService(map);
+
+          fetchAverageRatings().then(() => {
+            searchNearby(userLocation);
+          });
+
+          map.addListener("idle", () => {
+            const center = map.getCenter();
+            if (center) {
+              fetchAverageRatings().then(() => {
+                searchNearby({ lat: center.lat(), lng: center.lng() });
+              });
+            }
+          });
+        },
+        error => {
+          console.error("Geolocation error:", error);
+          fallbackToDublin();
+        }
+      );
+    } else {
+      fallbackToDublin();
+    }
+
+    function fallbackToDublin() {
       const dublin = { lat: 53.3498, lng: -6.2603 };
       map = new google.maps.Map(document.getElementById("map"), {
         center: dublin,
         zoom: 14
-      });
+  });
 
-      placesService = new google.maps.places.PlacesService(map);
-      infoWindow = new google.maps.InfoWindow();
+  placesService = new google.maps.places.PlacesService(map);
 
+  fetchAverageRatings().then(() => {
+    searchNearby(dublin);
+  });
+
+  map.addListener("idle", () => {
+    const center = map.getCenter();
+    if (center) {
       fetchAverageRatings().then(() => {
-        searchNearby(dublin);
+        searchNearby({ lat: center.lat(), lng: center.lng() });
       });
+    }
+  });
+}
 
-      map.addListener("idle", () => {
-        const center = map.getCenter();
-        if (center) {
-          fetchAverageRatings().then(() => {
-            searchNearby({ lat: center.lat(), lng: center.lng() });
-          });
-        }
-      });
     }
 
     async function fetchAverageRatings() {
