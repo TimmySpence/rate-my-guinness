@@ -3,10 +3,9 @@ kind: Service
 metadata:
   name: rate-my-guinness-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: rate-my-guinness
   ports:
-    - protocol: TCP
-      port: 80
+    - port: 5000
       targetPort: 5000

@@ -1,0 +1,27 @@
+
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rmg-ingress
+  namespace: rate-my-guinness
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80, "HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-west-1:581855228766:certificate/b18218cb-2e28-46d4-82fe-e74aaacf0bce
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: rmg
+spec:
+  ingressClassName: alb
+  rules:
+    - host: rate-my-guinness.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rate-my-guinness-service
+                port:
+                  number: 5000
