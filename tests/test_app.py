@@ -1,13 +1,20 @@
+
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import pytest
-from app import app
+
+# Ensure test mode before importing app
+os.environ['FLASK_ENV'] = 'testing'
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app import app, db
 
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
+    # Create tables for each test run
+    with app.app_context():
+        db.create_all()
     with app.test_client() as client:
         yield client
 
