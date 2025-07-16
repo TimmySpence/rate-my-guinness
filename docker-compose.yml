@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - POSTGRES_USER=rmgadmin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=rate_my_guinness
+      - DB_USER=rmgadmin
+      - DB_PASS=password
+      - DB_HOST=db
+      - DB_NAME=rate_my_guinness
+      - DB_PORT=5432
+    depends_on:
+      - db
+    entrypoint: ["/bin/bash", "-c", "chmod +x /wait-for-postgres.sh && /wait-for-postgres.sh db python app.py"]
+    volumes:
+      - ./wait-for-postgres.sh:/wait-for-postgres.sh
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=rmgadmin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=rate_my_guinness
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
