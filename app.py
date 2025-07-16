@@ -7,9 +7,9 @@ app = Flask(__name__)
 CORS(app)
 
 # Load DB config from environment variables (or fallback to defaults)
-DB_USER = os.environ.get("DB_USER", "rmgadmin")
+DB_USER = os.environ.get("DB_USER", "")
 DB_PASS = os.environ.get("DB_PASS", "")
-DB_HOST = os.environ.get("DB_HOST", "rate-my-guinness.c5weyfs9nmdb.eu-west-1.rds.amazonaws.com")
+DB_HOST = os.environ.get("DB_HOST", "")
 DB_NAME = os.environ.get("DB_NAME", "")  # Note: Use underscores, not hyphens for DB names
 DB_PORT = os.environ.get("DB_PORT", "5432")
 
