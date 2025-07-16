@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
+import pytest
 
 app = Flask(__name__)
 CORS(app)
@@ -93,14 +94,15 @@ def create_tables():
     except Exception as e:
         return f"Error: {e}"
 
-@app.before_request
-def initialize_database():
-    app.before_request_funcs[None].remove(initialize_database)
+# Ensure tables are created before app starts serving requests
+with app.app_context():
     db.create_all()
 
-if __name__ == "__main__":
-    # Ensure tables are created before app starts serving requests
-    with app.app_context():
-        db.create_all()
+@pytest.fixture
+def client():
+    app.config['TESTING'] = True  # Ensure test mode before anything else
+    with app.test_client() as client:
+        yield client
 
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
