@@ -4,12 +4,16 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
+
 # Install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir -r requirements.txt
+
 
 # Copy application code
 COPY . .
+RUN chmod +x /app/wait-for-postgres.sh
 
 # Set environment variables (can be overridden in deployment)
 ENV FLASK_ENV=production
