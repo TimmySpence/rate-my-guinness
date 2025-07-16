@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import os
-import pytest
 
 TESTING = os.environ.get("TESTING") == "1"
 
