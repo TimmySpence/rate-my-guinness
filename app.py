@@ -98,11 +98,6 @@ def create_tables():
 with app.app_context():
     db.create_all()
 
-@pytest.fixture
-def client():
-    app.config['TESTING'] = True  # Ensure test mode before anything else
-    with app.test_client() as client:
-        yield client
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
