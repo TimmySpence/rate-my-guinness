@@ -6,15 +6,17 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-# Load DB config from environment variables (or fallback to defaults)
-DB_USER = os.environ.get("DB_USER", "")
-DB_PASS = os.environ.get("DB_PASS", "")
-DB_HOST = os.environ.get("DB_HOST", "")
-DB_NAME = os.environ.get("DB_NAME", "")  # Note: Use underscores, not hyphens for DB names
-DB_PORT = os.environ.get("DB_PORT", "")
 
-# Construct the database URI
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+# Use SQLite for tests, otherwise use environment variables for Postgres
+if app.config.get("TESTING"):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+else:
+    DB_USER = os.environ.get("DB_USER", "rmgadmin")
+    DB_PASS = os.environ.get("DB_PASS", "")
+    DB_HOST = os.environ.get("DB_HOST", "localhost")
+    DB_NAME = os.environ.get("DB_NAME", "rate_my_guinness")  # Use underscores
+    DB_PORT = os.environ.get("DB_PORT", "5432")
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Initialize SQLAlchemy
