@@ -4,12 +4,13 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 import pytest
 
+TESTING = os.environ.get("TESTING") == "1"
+
 app = Flask(__name__)
 CORS(app)
 
-
-# Use SQLite for tests, otherwise use environment variables for Postgres
-if app.config.get("TESTING"):
+if TESTING:
+    app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 else:
     DB_USER = os.environ.get("DB_USER", "rmgadmin")

@@ -1,13 +1,27 @@
-
 import sys
 import os
 import pytest
+from flask import Flask
+from flask_cors import CORS
 
 # Ensure test mode before importing app
 os.environ['FLASK_ENV'] = 'testing'
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app import app, db
+
+# Configure app for testing
+TESTING = os.environ.get("TESTING") == "1"
+
+app = Flask(__name__)
+CORS(app)
+
+if TESTING:
+    app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+else:
+    # ...existing Postgres config...
+    pass
 
 @pytest.fixture
 def client():
