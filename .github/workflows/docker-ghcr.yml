@@ -1,8 +1,11 @@
 name: Build and Push Docker Image
 
+
 on:
   push:
     branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -19,12 +22,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up Docker tags
+        id: vars
+        run: |
+          repo_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "repo_name=$repo_name" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            version_tag=${{ github.event.release.tag_name }}
+            echo "docker_tags=ghcr.io/$repo_name:latest,ghcr.io/$repo_name:$version_tag" >> $GITHUB_OUTPUT
+          else
+            echo "docker_tags=ghcr.io/$repo_name:latest" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build Docker image
         run: |
-          repo_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker build -t ghcr.io/$repo_name:latest .
+          tags=$(echo "${{ steps.vars.outputs.docker_tags }}" | tr ',' ' ')
+          docker build $(for tag in $tags; do echo -n "-t $tag "; done) .
 
-      - name: Push Docker image
+      - name: Push Docker image(s)
         run: |
-          repo_name=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker push ghcr.io/$repo_name:latest
+          tags=$(echo "${{ steps.vars.outputs.docker_tags }}" | tr ',' ' ')
+          for tag in $tags; do
+            docker push $tag
+          done
