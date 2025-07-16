@@ -91,8 +91,9 @@ def create_tables():
     except Exception as e:
         return f"Error: {e}"
 
-@app.before_first_request
+@app.before_request
 def initialize_database():
+    app.before_request_funcs[None].remove(initialize_database)
     db.create_all()
 
 if __name__ == "__main__":
