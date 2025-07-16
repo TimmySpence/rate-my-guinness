@@ -1,10 +1,10 @@
 
-import sys
-import os
-import pytest
 
-# Ensure test mode before importing app
-os.environ['FLASK_ENV'] = 'testing'
+import os
+os.environ["TESTING"] = "1"  # Ensure test mode before importing app
+
+import sys
+import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app import app, db
