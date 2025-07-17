@@ -19,6 +19,3 @@ resource "google_container_cluster" "autopilot" {
   enable_autopilot = true
 }
 
-resource "google_container_node_pool" "default" {
-  count    = 0 # No node pools for autopilot
-}
