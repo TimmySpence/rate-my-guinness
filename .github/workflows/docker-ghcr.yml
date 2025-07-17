@@ -37,7 +37,7 @@ jobs:
       - name: Build Docker image
         run: |
           tags=$(echo "${{ steps.vars.outputs.docker_tags }}" | tr ',' ' ')
-          docker build $(for tag in $tags; do echo -n "-t $tag "; done) .
+          docker build -f docker/Dockerfile $(for tag in $tags; do echo -n "-t $tag "; done) .
 
       - name: Push Docker image(s)
         run: |
