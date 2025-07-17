@@ -38,4 +38,6 @@ resource "helm_release" "rate_my_guinness" {
   chart      = "../chart"
   namespace  = "default"
   dependency_update = true
+
+  depends_on = [google_container_cluster.autopilot]
 }
