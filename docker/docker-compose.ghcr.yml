@@ -2,6 +2,10 @@ version: '3.8'
 services:
   app:
     image: ghcr.io/timmyspence/rate-my-guinness:latest # Update with your actual image name and tag
+    # Uncomment below if you want to build from Dockerfile instead of pulling image
+    # build:
+    #   context: ..
+    #   dockerfile: docker/Dockerfile
     ports:
       - "5000:5000"
     environment:

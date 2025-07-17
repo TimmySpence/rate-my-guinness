@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rate-my-guinness-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rate-my-guinness
+  template:
+    metadata:
+      labels:
+        app: rate-my-guinness
+    spec:
+      containers:
+      - name: rate-my-guinness
+        image: 581855228766.dkr.ecr.eu-west-1.amazonaws.com/rate-my-guinness:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_USER
+          value: "rmgadmin"
+        - name: DB_PASS
+          value: "irateyourguinness5stars"
+        - name: DB_HOST
+          value: "rate-my-guinness.c5weyfs9nmdb.eu-west-1.rds.amazonaws.com"
+        - name: DB_NAME
+          value: "postgres"
