@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "rate-my-guinness.fullname" . }}
+  labels:
+    app: {{ include "rate-my-guinness.name" . }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "rate-my-guinness.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}

@@ -168,6 +168,10 @@
         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
           results.forEach(place => {
             if (!place.geometry || !place.geometry.location) return;
+            // Only show label for places that can be rated for Guinness
+            const lowerName = place.name ? place.name.toLowerCase() : '';
+            const types = place.types ? place.types.join(' ').toLowerCase() : '';
+            const isGuinnessPlace = lowerName.includes('guinness') || lowerName.includes('bar') || lowerName.includes('pub') || types.includes('bar') || types.includes('pub');
             const info = avgRatings[place.place_id];
             const ratingLabel = info
               ? `Avg: ${info.average_rating} (${info.rating_count})`
@@ -178,6 +182,66 @@
               title: place.name,
               icon: guinnessIcon
             });
+            if (isGuinnessPlace) {
+              // Add a label below the marker using a custom overlay
+              const labelDiv = document.createElement('div');
+              labelDiv.innerText = place.name;
+              labelDiv.style.position = 'absolute';
+              labelDiv.style.transform = 'translate(-50%, 0)';
+              labelDiv.style.background = 'rgba(0,0,0,0.7)';
+              labelDiv.style.color = '#FFD700';
+              labelDiv.style.fontFamily = "'Montserrat', 'Inter', Arial, sans-serif";
+              labelDiv.style.fontWeight = '600';
+              labelDiv.style.fontSize = '1rem';
+              labelDiv.style.padding = '2px 8px';
+              labelDiv.style.borderRadius = '8px';
+              labelDiv.style.marginTop = '4px';
+              labelDiv.style.cursor = 'pointer';
+              labelDiv.title = 'Rate this place';
+              // Click handler for label
+              labelDiv.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectedPlace = {
+                  name: place.name,
+                  place_id: place.place_id,
+                  lat: place.geometry.location.lat(),
+                  lng: place.geometry.location.lng()
+                };
+                document.getElementById("place-name").innerText = selectedPlace.name;
+                document.getElementById("average-rating").innerText = info
+                  ? `Average rating: ${info.average_rating} (${info.rating_count})`
+                  : "No ratings yet";
+                document.getElementById("rating").value = '';
+                ratingModal = new bootstrap.Modal(document.getElementById('ratingModal'));
+                ratingModal.show();
+                infoWindow.setContent(`<strong>${place.name}</strong><br>${ratingLabel}`);
+                infoWindow.open(map, marker);
+              });
+              // Custom OverlayView for label
+              const LabelOverlay = function(position, element) {
+                this.position = position;
+                this.element = element;
+              };
+              LabelOverlay.prototype = new google.maps.OverlayView();
+              LabelOverlay.prototype.onAdd = function() {
+                this.getPanes().floatPane.appendChild(this.element);
+              };
+              LabelOverlay.prototype.draw = function() {
+                const projection = this.getProjection();
+                const pos = projection.fromLatLngToDivPixel(this.position);
+                if (pos) {
+                  this.element.style.left = pos.x + 'px';
+                  this.element.style.top = (pos.y + 32) + 'px'; // 32px below marker
+                }
+              };
+              LabelOverlay.prototype.onRemove = function() {
+                if (this.element.parentNode) {
+                  this.element.parentNode.removeChild(this.element);
+                }
+              };
+              const overlay = new LabelOverlay(place.geometry.location, labelDiv);
+              overlay.setMap(map);
+            }
             marker.addListener("click", () => {
               selectedPlace = {
                 name: place.name,
