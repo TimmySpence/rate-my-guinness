@@ -9,6 +9,11 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=guinness
       - POSTGRES_HOST=db
+      - DB_USER=rmgadmin
+      - DB_PASS=password
+      - DB_HOST=db
+      - DB_NAME=rate_my_guinness
+      - DB_PORT=5432
     depends_on:
       - db
   db:
