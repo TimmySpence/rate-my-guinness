@@ -22,7 +22,3 @@ resource "google_container_cluster" "autopilot" {
 resource "google_container_node_pool" "default" {
   count    = 0 # No node pools for autopilot
 }
-
-output "kubernetes_cluster_name" {
-  value = google_container_cluster.autopilot.name
-}
