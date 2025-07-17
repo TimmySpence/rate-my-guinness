@@ -17,5 +17,32 @@ resource "google_container_cluster" "autopilot" {
   name     = "guinness-autopilot"
   location = var.region
   enable_autopilot = true
+  deletion_protection = false
 }
 
+# Configure Kubernetes provider using GKE credentials
+provider "kubernetes" {
+  host                   = google_container_cluster.autopilot.endpoint
+  token                  = data.google_client_config.default.access_token
+  cluster_ca_certificate = base64decode(google_container_cluster.autopilot.master_auth[0].cluster_ca_certificate)
+}
+
+# Get GCP credentials for Kubernetes provider
+data "google_client_config" "default" {}
+
+# Helm provider
+provider "helm" {
+  kubernetes {
+    host                   = google_container_cluster.autopilot.endpoint
+    token                  = data.google_client_config.default.access_token
+    cluster_ca_certificate = base64decode(google_container_cluster.autopilot.master_auth[0].cluster_ca_certificate)
+  }
+}
+
+# Deploy Helm chart
+resource "helm_release" "rate_my_guinness" {
+  name       = "rate-my-guinness"
+  chart      = "../chart"
+  namespace  = "default"
+  dependency_update = true
+}
