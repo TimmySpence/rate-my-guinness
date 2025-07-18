@@ -25,7 +25,7 @@ jobs:
       - name: Set lowercase repo owner
         id: repo
         run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
-        
+
       - name: Install gke-gcloud-auth-plugin
         run: |
           gcloud components install gke-gcloud-auth-plugin
@@ -33,6 +33,15 @@ jobs:
       - name: Get GKE credentials
         run: |
           gcloud container clusters get-credentials guinness-autopilot --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Create GHCR image pull secret
+        run: |
+          kubectl create secret docker-registry ghcr-secret \
+            --docker-server=ghcr.io \
+            --docker-username=${{ secrets.GHCR_USERNAME }} \
+            --docker-password=${{ secrets.GHCR_PAT }} \
+            --docker-email=${{ secrets.GHCR_EMAIL }} \
+            --namespace=rmg --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
