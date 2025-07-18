@@ -30,6 +30,8 @@ spec:
             - name: POSTGRES_HOST
               value: "db"
           resources: {{- toYaml .Values.resources | nindent 12 }}
+      imagePullSecrets:
+        - name: ghcr-secret
 ---
 apiVersion: apps/v1
 kind: Deployment
