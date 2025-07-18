@@ -32,7 +32,9 @@ provider "kubernetes" {
 # Get GCP credentials for Kubernetes provider
 data "google_client_config" "default" {}
 
+
 # Helm provider
+provider "helm" {}
 
 # Deploy Helm chart
 resource "helm_release" "rate_my_guinness" {
@@ -41,6 +43,5 @@ resource "helm_release" "rate_my_guinness" {
   namespace  = "default"
   dependency_update = true
 
-  provider   = kubernetes.gke
   depends_on = [google_container_cluster.autopilot]
 }
