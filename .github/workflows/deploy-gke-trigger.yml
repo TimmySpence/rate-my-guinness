@@ -22,7 +22,10 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          
+      - name: Set lowercase repo owner
+        id: repo
+        run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+        
       - name: Install gke-gcloud-auth-plugin
         run: |
           gcloud components install gke-gcloud-auth-plugin
@@ -37,6 +40,6 @@ jobs:
       - name: Deploy with Helm
         run: |
           helm upgrade --install rate-my-guinness ./chart \
-            --set image.repository=ghcr.io/${{ github.repository_owner }}/rate-my-guinness \
+            --set image.repository=ghcr.io/${{ steps.repo.outputs.owner }}/rate-my-guinness \
             --set image.tag=latest \
             --namespace rmg --create-namespace
