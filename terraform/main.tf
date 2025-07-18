@@ -20,8 +20,10 @@ resource "google_container_cluster" "autopilot" {
   deletion_protection = false
 }
 
-# Configure Kubernetes provider using GKE credentials
+
+# Configure Kubernetes provider using GKE credentials (with alias)
 provider "kubernetes" {
+  alias                  = "gke"
   host                   = google_container_cluster.autopilot.endpoint
   token                  = data.google_client_config.default.access_token
   cluster_ca_certificate = base64decode(google_container_cluster.autopilot.master_auth[0].cluster_ca_certificate)
@@ -39,5 +41,6 @@ resource "helm_release" "rate_my_guinness" {
   namespace  = "default"
   dependency_update = true
 
+  provider   = kubernetes.gke
   depends_on = [google_container_cluster.autopilot]
 }
