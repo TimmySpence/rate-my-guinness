@@ -21,7 +21,7 @@ jobs:
 
       - name: Authenticate to Google Cloud
         run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > "${HOME}/gcloud.json"
+          printf '%s' "${{ secrets.GCP_SA_KEY }}" > "${HOME}/gcloud.json"
           gcloud auth activate-service-account --key-file="${HOME}/gcloud.json"
 
       - name: Get GKE credentials
