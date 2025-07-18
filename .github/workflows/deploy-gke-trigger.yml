@@ -24,11 +24,15 @@ jobs:
         run: |
           printf '%s' "${{ secrets.GCP_SA_KEY }}" > "${HOME}/gcloud.json"
           gcloud auth activate-service-account --key-file="${HOME}/gcloud.json"
-          
+
       - name: Debug GCP_SA_KEY
         run: |
           printf '%s' "${{ secrets.GCP_SA_KEY }}"
 
+      - name: Debug written gcloud.json
+        run: |
+          cat "${HOME}/gcloud.json"
+          
       - name: Get GKE credentials
         run: |
           gcloud container clusters get-credentials guinness-autopilot --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }}
