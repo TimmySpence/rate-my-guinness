@@ -34,6 +34,10 @@ jobs:
         run: |
           gcloud container clusters get-credentials guinness-autopilot --region ${{ secrets.GCP_REGION }} --project ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Ensure rmg namespace exists
+        run: |
+          kubectl get namespace rmg || kubectl create namespace rmg
+
       - name: Create GHCR image pull secret
         run: |
           kubectl create secret docker-registry ghcr-secret \
