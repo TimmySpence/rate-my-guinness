@@ -36,7 +36,7 @@ class Rating(db.Model):
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    return render_template("home.html", google_maps_key=os.environ.get("GOOGLE_MAPS_API_KEY"))
 
 @app.route("/api/ratings", methods=["POST"])
 def submit_rating():
