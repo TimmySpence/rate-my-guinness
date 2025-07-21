@@ -18,6 +18,11 @@ RUN chmod +x /app/wait-for-postgres.sh
 # Set environment variables (can be overridden in deployment)
 ENV FLASK_ENV=production
 
+# Set the google maps API key
+# This can be set at build time using --build-arg GOOGLE_MAPS_API_KEY=your_key
+ARG GOOGLE_MAPS_API_KEY
+ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+
 # Expose the port Flask or Gunicorn will listen on
 EXPOSE 5000
 
