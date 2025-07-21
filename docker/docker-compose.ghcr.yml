@@ -20,6 +20,9 @@ services:
       - DB_PORT=5432
     depends_on:
       - db
+    entrypoint: ["/bin/bash", "-c", "chmod +x /wait-for-postgres.sh && /wait-for-postgres.sh db python app.py"]
+    volumes:
+      - ./wait-for-postgres.sh:/wait-for-postgres.sh
   db:
     image: postgres:15
     restart: always
