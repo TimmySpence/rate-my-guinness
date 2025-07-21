@@ -9,10 +9,9 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=guinness
-      - POSTGRES_HOST=db
+      - POSTGRES_USER=rmgadmin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=rate_my_guinness
       - DB_USER=rmgadmin
       - DB_PASS=password
       - DB_HOST=db
@@ -27,9 +26,9 @@ services:
     image: postgres:15
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=guinness
+      - POSTGRES_USER=rmgadmin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=rate_my_guinness
     ports:
       - "5432:5432"
     volumes:

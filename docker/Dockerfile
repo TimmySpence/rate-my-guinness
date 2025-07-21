@@ -9,7 +9,6 @@ COPY requirements.txt .
 RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -r requirements.txt
 
-
 # Copy application code
 COPY . .
 COPY docker/wait-for-postgres.sh /app/wait-for-postgres.sh
