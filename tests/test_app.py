@@ -1,5 +1,3 @@
-
-
 import os
 os.environ["TESTING"] = "1"  # Ensure test mode before importing app
 
@@ -21,7 +19,7 @@ def client():
 def test_home_page(client):
     response = client.get('/')
     assert response.status_code == 200
-    assert b'Guinness' in response.data  # Adjust if your home.html has a different keyword
+    assert b'Guinness' in response.data  
 
 def test_submit_rating_missing_data(client):
     response = client.post('/api/ratings', json={})
