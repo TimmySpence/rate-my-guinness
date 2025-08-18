@@ -13,6 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Build the Docker image
       run: docker build --build-arg GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} . --file docker/Dockerfile --tag my-image-name:$(date +%s)
